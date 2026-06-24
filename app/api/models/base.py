@@ -30,8 +30,8 @@ class JobStatus(str, Enum):
     CANCELLED = "cancelled"
 
 
-class SeparateResponseLinks(TypedDict):
-    """Response links for separate /separate"""
+class DemixResponseLinks(TypedDict):
+    """Response links for /demix"""
 
     status: HttpUrl
     result: HttpUrl

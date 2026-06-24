@@ -1,23 +1,22 @@
 from datetime import datetime
 from typing import Optional
 
-from base import BaseJobModel, JobStatus, ModelType, SeparateResponseLinks
+from base import BaseJobModel, DemixResponseLinks, JobStatus, ModelType
 from pydantic import BaseModel, Field
 
 
-class SeparateResponse(BaseModel):
-    """Response model for GET /v1/separate"""
+class DemixResponse(BaseJobModel):
+    """Response model for POST /demix"""
 
-    job_id: int = Field(..., description="Unique Job identifier")
     message: str = Field(..., description="Separate message")
     estimated_seconds: int = Field(..., description="Estimated seconds for processing")
-    links: SeparateResponseLinks = Field(
+    links: DemixResponseLinks = Field(
         ..., description="Links for status, result and cancellation"
     )
 
 
 class JobResponse(BaseJobModel):
-    """Response model for GET /v1/jobs/{job_id}"""
+    """Response model for GET /jobs/{job_id}"""
 
     status: JobStatus = Field(..., description="Current job status")
     progress: float = Field(
@@ -35,7 +34,7 @@ class JobResponse(BaseJobModel):
 
 
 class JobResultMetadata(BaseJobModel):
-    """Response model for GET /v1/jobs/{job_id}/result/metadata"""
+    """Response model for GET /jobs/{job_id}/result/metadata"""
 
     stems: list[str] = Field(..., description="List of stem names available")
     sample_rate: int = Field(..., description="Sample rate of stems in Hz")
@@ -45,14 +44,14 @@ class JobResultMetadata(BaseJobModel):
 
 
 class JobCancelResponse(BaseJobModel):
-    """Response model for GET /v1/jobs/{job_id}/cancel"""
+    """Response model for POST /jobs/{job_id}/cancel"""
 
     message: str = Field(..., description="Canccel job message")
     status: str = Field(..., description="Current job status")
 
 
 class JobListResponse(BaseModel):
-    """Response model for GET /v1/jobs (admin only)"""
+    """Response model for GET /jobs (admin only)"""
 
     jobs: list[JobResponse] = Field(..., description="List of jobs")
     total: int = Field(..., description="Total number of jobs")
