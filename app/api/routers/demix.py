@@ -15,7 +15,7 @@ MAX_FILE_SIZE = 200 * 1024 * 1024  # 500 MB
 
 @router.post("", response_model=DemixResponse, status_code=status.HTTP_202_ACCEPTED)
 async def demix(data: DemixRequest = Form(..., media_type="multipart/form-data")):
-    # job_id = job_manager.create_job(data) # create job manager instance on server startup
+    # job_id = demix_service.start_demix(data) # create job manager instance on server startup
 
     # return DemixResponse(
     #     id=uuid4(),
@@ -33,7 +33,7 @@ async def demix(data: DemixRequest = Form(..., media_type="multipart/form-data")
 @router.get("/{id}", response_model=JobResponse)
 def get_job(id: UUID):
     """Get demix job"""
-    # job = job_manager.get_job(id) # job already of type JobResponse
+    # job = demix_service.get_demix_status(id) # job already of type JobResponse
 
     # return job
     pass
@@ -42,7 +42,7 @@ def get_job(id: UUID):
 @router.get("/{id}/result", response_class=FileResponse)
 def get_job_result(id: UUID):
     """Download separated stems as ZIP file"""
-    # job_result = job_manager.get_job_result(id)
+    # job_result = demix_service.get_demix_result(id)
 
     # return job_result
     pass
@@ -55,7 +55,7 @@ def get_job_result(id: UUID):
 )
 async def cancel_job(id: UUID):
     """Cancel a queued or processing job."""
-    # response = job_manager.cancel_job(id)
+    # response = job_manager.cancel_demix(id)
 
     # return JobCancelResponse(
     #     id=uuid4(),
