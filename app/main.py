@@ -1,15 +1,6 @@
-from fastapi import FastAPI, HTTPException
+from api.routers.demix import router as demix_router
+from fastapi import FastAPI
 
-# use pydantic?
-app = FastAPI()
+app = FastAPI(title="Source Demixing System", version="", description="")
 
-
-@app.get("/")
-def root():
-    return {"hello": "world"}
-
-
-@app.post("/split")
-def split_audio(audio_file):
-    # logic for separation
-    return "a"
+app.include_router(demix_router, prefix="v1")
