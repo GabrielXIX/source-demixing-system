@@ -35,5 +35,4 @@ class DemixResponseLinks(TypedDict):
 
     status: HttpUrl
     result: HttpUrl
-    result_metadata: HttpUrl
     cancel: HttpUrl
