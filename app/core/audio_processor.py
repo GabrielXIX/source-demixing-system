@@ -1,4 +1,10 @@
+from pathlib import Path
+
+from exceptions import InvalidAudioError
 from fastapi import UploadFile
+
+MAX_FILE_SIZE = 250 * 1024 * 1024  # 250 MB
+SUPPORTED_FILE_FORMATS = ["wav", "mp3"]
 
 
 class AudioProcessor:
@@ -6,13 +12,18 @@ class AudioProcessor:
         pass
 
     def validate_track_basic(self, file: UploadFile):
-        # Validate file type
+        if not file.content_type or file.content_type.startswith("audio/"):
+            raise InvalidAudioError("Invalid file type")
 
-        # Validate file size
+        if not file.size or file.size > MAX_FILE_SIZE:
+            raise InvalidAudioError("File size too large")
 
-        # Validate file extension
+        if not file.filename:
+            raise InvalidAudioError("No file name")
 
-        pass
+        extension = Path(file.filename).suffix.lower()
+        if extension not in SUPPORTED_FILE_FORMATS:
+            raise InvalidAudioError("Unsupported file extension")
 
     def validate_track_deep(self, file: UploadFile):
         # Validate duration
