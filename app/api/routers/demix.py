@@ -10,8 +10,6 @@ from app.api.models.response import DemixResponse, JobCancelResponse, JobRespons
 
 router = APIRouter(prefix="demix", tags=["Demix"])
 
-MAX_FILE_SIZE = 200 * 1024 * 1024  # 500 MB
-
 
 @router.post("", response_model=DemixResponse, status_code=status.HTTP_202_ACCEPTED)
 async def demix(data: DemixRequest = Form(..., media_type="multipart/form-data")):
