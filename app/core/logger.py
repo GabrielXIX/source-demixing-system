@@ -28,7 +28,8 @@ class Logger:
             self._configure_structlog(json_logs, log_level)
             Logger._instance = self
 
-        self.logger = structlog.stdlib.get_logger(settings.APP_LOGGER_NAME)
+        self._app_logger = structlog.stdlib.get_logger(settings.APP_LOGGER_NAME)
+        self._access_logger = structlog.stdlib.get_logger(settings.ACCESS_LOGGER_NAME)
 
     def _configure_structlog(self, json_logs: bool, log_level: str):
         timestamper = structlog.processors.TimeStamper(fmt="iso")
@@ -111,22 +112,40 @@ class Logger:
         structlog.contextvars.unbind_contextvars(*keys)
 
     def debug(self, event: Optional[str] = None, *args: Any, **kwargs: Any):
-        self.logger.debug(event, *args, **kwargs)
+        self._app_logger.debug(event, *args, **kwargs)
 
     def info(self, event: Optional[str] = None, *args: Any, **kwargs: Any):
-        self.logger.info(event, *args, **kwargs)
+        self._app_logger.info(event, *args, **kwargs)
 
     def warning(self, event: Optional[str] = None, *args: Any, **kwargs: Any):
-        self.logger.warning(event, *args, **kwargs)
+        self._app_logger.warning(event, *args, **kwargs)
 
     def error(self, event: Optional[str] = None, *args: Any, **kwargs: Any):
-        self.logger.error(event, *args, **kwargs)
+        self._app_logger.error(event, *args, **kwargs)
 
     def critical(self, event: Optional[str] = None, *args: Any, **kwargs: Any):
-        self.logger.critical(event, *args, **kwargs)
+        self._app_logger.critical(event, *args, **kwargs)
 
     def exception(self, event: Optional[str] = None, *args: Any, **kwargs: Any):
-        self.logger.exception(event, *args, **kwargs)
+        self._app_logger.exception(event, *args, **kwargs)
+
+    def access_debug(self, event: Optional[str] = None, *args: Any, **kw: Any):
+        self._access_logger.debug(event, *args, **kw)
+
+    def access_info(self, event: Optional[str] = None, *args: Any, **kw: Any):
+        self._access_logger.info(event, *args, **kw)
+
+    def access_warning(self, event: Optional[str] = None, *args: Any, **kw: Any):
+        self._access_logger.warning(event, *args, **kw)
+
+    def access_error(self, event: Optional[str] = None, *args: Any, **kw: Any):
+        self._access_logger.error(event, *args, **kw)
+
+    def access_critical(self, event: Optional[str] = None, *args: Any, **kw: Any):
+        self._access_logger.critical(event, *args, **kw)
+
+    def access_exception(self, event: Optional[str] = None, *args: Any, **kw: Any):
+        self._access_logger.exception(event, *args, **kw)
 
 
 logger = Logger(json_logs=settings.LOG_JSON_FORMAT, log_level=settings.LOG_LEVEL)
