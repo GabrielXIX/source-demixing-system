@@ -1,8 +1,20 @@
 from fastapi import BackgroundTasks
+from storage_service import StorageService
+
+from app.core.audio_processor import AudioProcessor
+from app.core.demucs_engine import DemucsEngine
+from app.core.job_manager import JobManager
+from app.core.logger import logger
 
 
 class DemixService:
     """Orchestrates the demix process"""
+
+    def __init__(self):
+        self.audio_processor = AudioProcessor()
+        self.demucs_engine = DemucsEngine()
+        self.job_manager = JobManager()
+        self.storage_service = StorageService()
 
     async def start_demix(self, data, background_tasks: BackgroundTasks):
         try:
