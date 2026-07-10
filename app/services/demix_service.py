@@ -18,23 +18,32 @@ class DemixService:
 
     async def start_demix(self, data, background_tasks: BackgroundTasks):
         try:
+            logger.info("Starting demix...")
+
             # 1. Do basic file validation
+            logger.info("Basic file validation done")
 
             # 2. Create job
+            logger.info("Job created")
 
             # 3. Save file to storage
             # 3.1 Update job status
+            logger.info("File saved to storage")
 
             # 4. Do deep file validation
             # 4.1 Update job status
             # 4.2 Delete file if deep validation fails
+            logger.info("Deep file validation done")
 
             # 5. Save metadata
             # 5.1 Update job status
+            logger.info("Job metadata updated")
 
             # 6. Start background task (demucs engine, storage service, job manager)
             # 6.1 Update job status
+            logger.info("Demucs process started")
 
+            logger.info("Demix started successfully")
             # 5. Return job id for added job
             pass
         except Exception as e:
