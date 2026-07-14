@@ -19,9 +19,12 @@ class DemixService:
     async def start_demix(self, data, background_tasks: BackgroundTasks):
         try:
             logger.info("Starting demix...")
+            file = data.file
+            model = data.model
 
             # 1. Do basic file validation
-            logger.info("Basic file validation done")
+            self.audio_processor.validate_file(file)
+            logger.info("File validation done")
 
             # 2. Create job
             logger.info("Job created")
@@ -33,7 +36,7 @@ class DemixService:
             # 4. Do deep file validation
             # 4.1 Update job status
             # 4.2 Delete file if deep validation fails
-            logger.info("Deep file validation done")
+            logger.info("Track validation done")
 
             # 5. Save metadata
             # 5.1 Update job status
