@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import TypedDict
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from pydantic import BaseModel, Field, HttpUrl
 
@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, HttpUrl
 class BaseJobModel(BaseModel):
     """Base model for job-related internal models"""
 
-    id: UUID = Field(default_factory=uuid4, description="Unique Job Identifier")
+    id: UUID = Field(..., description="Unique Job Identifier")
 
 
 class ModelType(str, Enum):
@@ -22,7 +22,7 @@ class ModelType(str, Enum):
 class JobStatus(str, Enum):
     """Enums for job statuses"""
 
-    QUEUED = "queued"
+    PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
     FAILED = "failed"
