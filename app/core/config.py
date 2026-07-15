@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     LOG_FILE_MAX_BYTES: int = 5 * 1024 * 1024  # 5 MB
     LOG_FILE_BACKUP_COUNT: int = 3
 
+    STORAGE_PATH = "storage"
+
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", case_sensitive=True
     )
