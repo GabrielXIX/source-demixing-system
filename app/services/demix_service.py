@@ -27,6 +27,7 @@ class DemixService:
             logger.info("File validation done")
 
             # 2. Create job
+            job_id = self.job_manager.create_job(model)
             logger.info("Job created")
 
             # 3. Save file to storage
