@@ -1,4 +1,4 @@
-from fastapi import BackgroundTasks
+from fastapi import BackgroundTasks, HTTPException
 from storage_service import StorageService
 
 from app.core.audio_processor import AudioProcessor
@@ -23,7 +23,7 @@ class DemixService:
             model = data.model
 
             # 1. Do basic file validation
-            self.audio_processor.validate_file(file)
+            file_metadata = self.audio_processor.validate_file(file)
             logger.info("File validation done")
 
             # 2. Create job
@@ -32,7 +32,11 @@ class DemixService:
 
             # 3. Save file to storage
             # 3.1 Update job status
+            input_path = await self.storage_service.save_input(
+                job_id, file, file_metadata.extension
+            )
             logger.info("File saved to storage")
+            # Update job's input path
 
             # 4. Do deep file validation
             # 4.1 Update job status
@@ -49,7 +53,6 @@ class DemixService:
 
             logger.info("Demix started successfully")
             # 5. Return job id for added job
-            pass
+            return job_id
         except Exception as e:
-            # re raise to router
-            pass
+            raise HTTPException(status_code=500, detail="error")
