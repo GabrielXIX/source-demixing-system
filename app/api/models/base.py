@@ -28,11 +28,3 @@ class JobStatus(str, Enum):
     FAILED = "failed"
     CANCELLING = "cancelling"
     CANCELLED = "cancelled"
-
-
-class DemixResponseLinks(TypedDict):
-    """Response links for /demix"""
-
-    status: HttpUrl
-    result: HttpUrl
-    cancel: HttpUrl
