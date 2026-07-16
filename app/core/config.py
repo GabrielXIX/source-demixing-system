@@ -2,6 +2,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    API_VERSION: str = "v1"
+    API_BASE_URL: str = "http://localhost:8000"
+
     APP_LOGGER_NAME: str = "sds.app_logs"
     ACCESS_LOGGER_NAME: str = "sds.access_logs"
 
