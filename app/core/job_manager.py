@@ -27,7 +27,7 @@ class Job:
     file_size_bytes: Optional[int] = None
 
     input_path: Optional[str] = None
-    output_path: Optional[str] = None
+    output_dir: Optional[str] = None
     expires_at: Optional[str] = None
 
     def to_response(self) -> dict[str, Any]:
@@ -56,10 +56,10 @@ class JobManager:
         return job.id
 
     def _save_job_data(self, job: Job):
-        track_folder = self.storage_path / str(job.id)
-        track_folder.mkdir(exist_ok=True)
+        track_dir = self.storage_path / str(job.id)
+        track_dir.mkdir(exist_ok=True)
 
-        job_data_path = track_folder / "job.json"
+        job_data_path = track_dir / "job.json"
         with open(job_data_path, "w") as f:
             json.dump(asdict(job), f, indent=2)
 
