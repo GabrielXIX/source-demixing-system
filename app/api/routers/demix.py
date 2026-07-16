@@ -1,31 +1,33 @@
-from uuid import UUID, uuid4
+from uuid import UUID
 
-from fastapi import APIRouter, Form, status
+from fastapi import APIRouter, BackgroundTasks, Form, status
 from fastapi.responses import FileResponse
-from pydantic import HttpUrl
 
-from app.api.models.base import DemixResponseLinks
 from app.api.models.request import DemixRequest
 from app.api.models.response import DemixResponse, JobCancelResponse, JobResponse
+from app.api.utils.links import build_demix_response_links
+from app.services.demix_service import DemixService
 
 router = APIRouter(prefix="demix", tags=["Demix"])
 
+demix_service = DemixService()
+
 
 @router.post("", response_model=DemixResponse, status_code=status.HTTP_202_ACCEPTED)
-async def demix(data: DemixRequest = Form(..., media_type="multipart/form-data")):
-    # job_id = demix_service.start_demix(data) # create job manager instance on server startup
+async def demix(
+    background_tasks: BackgroundTasks,
+    data: DemixRequest = Form(..., media_type="multipart/form-data"),
+):
+    job_id = await demix_service.start_demix(data, background_tasks)
+    status_url, result_url, cancel_url = build_demix_response_links(job_id)
 
-    # return DemixResponse(
-    #     id=uuid4(),
-    #     message="",
-    #     estimated_seconds=0,
-    #     links=DemixResponseLinks(
-    #         status=HttpUrl(""),
-    #         result=HttpUrl(""),
-    #         cancel=HttpUrl("")
-    #     )
-    # )
-    pass
+    return DemixResponse(
+        id=job_id,
+        message="Demix process started successfully",
+        status_url=status_url,
+        result_url=result_url,
+        cancel_url=cancel_url,
+    )
 
 
 @router.get("/{id}", response_model=JobResponse)
