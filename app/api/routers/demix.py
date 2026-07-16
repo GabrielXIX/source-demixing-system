@@ -5,7 +5,7 @@ from fastapi.responses import FileResponse
 
 from app.api.models.request import DemixRequest
 from app.api.models.response import DemixResponse, JobCancelResponse, JobResponse
-from app.api.utils.links import build_demix_response_links
+from app.api.utils.links import build_demix_response_urls
 from app.services.demix_service import DemixService
 
 router = APIRouter(prefix="demix", tags=["Demix"])
@@ -19,7 +19,7 @@ async def demix(
     data: DemixRequest = Form(..., media_type="multipart/form-data"),
 ):
     job_id = await demix_service.start_demix(data, background_tasks)
-    status_url, result_url, cancel_url = build_demix_response_links(job_id)
+    status_url, result_url, cancel_url = build_demix_response_urls(job_id)
 
     return DemixResponse(
         id=job_id,
