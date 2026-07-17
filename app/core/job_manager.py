@@ -6,7 +6,10 @@ from typing import Any, Optional
 from uuid import UUID, uuid4
 
 from app.api.models.base import JobStatus, ModelType
+from app.api.utils.serializers import write_json_file
 from app.core.config import settings
+from app.core.exceptions import JobNotFoundError
+from app.core.logger import logger
 
 
 @dataclass
@@ -43,6 +46,7 @@ class JobManager:
         self._load_jobs()
 
     def create_job(self, model: ModelType) -> UUID:
+        logger.debug("Job creation started")
         job = Job(
             id=uuid4(),
             status=JobStatus.PENDING,
@@ -52,15 +56,38 @@ class JobManager:
             model=model,
         )
         self._jobs[job.id] = job
+
+        track_dir = self.storage_path / str(job.id)
+        track_dir.mkdir()
+
         self._save_job_data(job)
+
+        logger.debug("Job creation completed")
         return job.id
 
-    def _save_job_data(self, job: Job):
-        track_dir = self.storage_path / str(job.id)
-        track_dir.mkdir(exist_ok=True)
+    def update_job(self, job_id: UUID, **kwargs):
+        logger.debug("Job update started")
+        job = self._jobs.get(job_id)
+        if job is None:
+            raise JobNotFoundError("Job not found in memory")
 
+        for key, value in kwargs.items():
+            if hasattr(job, key):
+                setattr(job, key, value)
+            else:
+                raise KeyError(f"Unknown field for job: {key}")
+
+        job.updated_at = datetime.now()
+        self._save_job_data(job)
+        logger.debug("Job update completed")
+
+    def _save_job_data(self, job: Job):
+        logger.debug("Saving job data to disk started", extra={"status": job.status})
+        track_dir = self.storage_path / str(job.id)
         job_data_path = track_dir / "job.json"
+
         with open(job_data_path, "w") as f:
-            json.dump(asdict(job), f, indent=2)
+            write_json_file(asdict(job), f, indent=2)
+        logger.debug("Saving job data to disk completed")
 
     def _load_jobs(self) -> list[Job]: ...
