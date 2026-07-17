@@ -18,17 +18,18 @@ class DemixService:
 
     async def start_demix(self, data, background_tasks: BackgroundTasks):
         try:
-            logger.info("Starting demix...")
+            logger.info("Demix process started")
             file = data.file
             model = data.model
 
             # 1. Do basic file validation
             file_metadata = self.audio_processor.validate_file(file)
-            logger.info("File validation done")
+            logger.info("File validated")
 
             # 2. Create job
             job_id = self.job_manager.create_job(model)
             logger.info("Job created")
+            logger.bind(job_id=job_id)
 
             # 3. Save file to storage
             # 3.1 Update job status
@@ -41,18 +42,17 @@ class DemixService:
             # 4. Do deep file validation
             # 4.1 Update job status
             # 4.2 Delete file if deep validation fails
-            logger.info("Track validation done")
+            logger.info("Track validated")
 
             # 5. Save metadata
             # 5.1 Update job status
-            logger.info("Job metadata updated")
 
             # 6. Start background task (demucs engine, storage service, job manager)
             # 6.1 Update job status
-            logger.info("Demucs process started")
-
-            logger.info("Demix started successfully")
+            logger.info("Background demix process started")
             # 5. Return job id for added job
+
+            logger.unbind("job_id")
             return job_id
         except Exception as e:
             raise HTTPException(status_code=500, detail="error")

@@ -34,7 +34,7 @@ class AudioProcessor:
         pass
 
     def validate_file(self, file: UploadFile):
-        logger.debug("Starting file validation...")
+        logger.debug("File validation started")
 
         content_type = file.content_type
         if not content_type or content_type.startswith("audio/"):
