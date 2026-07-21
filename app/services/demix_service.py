@@ -36,7 +36,7 @@ class DemixService:
             # todo: add method to ensure saved file integrity
             self.job_manager.update_job(job_id, input_path=input_path)
 
-            track_metadata = await self.audio_processor.validate_track(file)
+            track_metadata = self.audio_processor.validate_track(file)
             logger.info("Track validated")
             # self.job_manager.update_job(job_id, ...)
 
@@ -51,5 +51,5 @@ class DemixService:
             logger.unbind("job_id")
             return job_id
         except Exception as e:
-            # Do cleanup if try fails
+            # todo: do cleanup if try fails
             raise HTTPException(status_code=500, detail="error")

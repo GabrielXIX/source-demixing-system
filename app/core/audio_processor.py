@@ -69,7 +69,7 @@ class AudioProcessor:
             content_type=content_type, size=size, filename=filename, extension=extension
         )
 
-    async def validate_track(self, file_path: Path):
+    def validate_track(self, file_path: Path):
         logger.debug("Track validation started")
         try:
             import torchaudio
