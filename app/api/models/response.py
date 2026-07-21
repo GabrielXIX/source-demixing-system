@@ -30,9 +30,10 @@ class JobResponse(BaseJobModel):
     estimated_seconds_remaining: int = Field(
         description="Estimated seconds until completion (only when processing)"
     )
-    sample_rate: int = Field(..., description="Sample rate of stems in Hz")
-    duration_seconds: float = Field(..., description="Duration of original audio")
-    file_size_bytes: int = Field(..., description="Size of ZIP file in bytes")
+    size_bytes: int = Field(..., description="Input audio size in bytes")
+    duration_seconds: float = Field(..., description="Input audio duration in seconds")
+    sample_rate_hz: int = Field(..., description="Input audio sample rate in Hz")
+    channels: int = Field(..., description="Input audio number of channels")
     expires_at: datetime = Field(..., description="When the result will be deleted")
 
 

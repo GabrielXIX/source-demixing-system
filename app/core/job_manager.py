@@ -21,17 +21,18 @@ class Job:
     progress: float
     created_at: datetime
     updated_at: datetime
-    model: ModelType
 
+    model: Optional[ModelType] = None
     stems: Optional[list[str]] = None
     estimated_seconds_remaining: Optional[int] = None
-    sample_rate: Optional[int] = None
     duration_seconds: Optional[int] = None
-    file_size_bytes: Optional[int] = None
+    sample_rate_hz: Optional[int] = None
+    size_bytes: Optional[int] = None
+    channels: Optional[int] = None
+    expires_at: Optional[str] = None
 
     input_path: Optional[str] = None
     output_dir: Optional[str] = None
-    expires_at: Optional[str] = None
 
     def to_response(self) -> dict[str, Any]:
         return {
@@ -45,7 +46,7 @@ class JobManager:
         self.storage_path = Path(settings.STORAGE_PATH)
         self._load_jobs()
 
-    def create_job(self, model: ModelType) -> UUID:
+    def create_job(self) -> UUID:
         logger.debug("Job creation started")
         job = Job(
             id=uuid4(),
@@ -53,7 +54,6 @@ class JobManager:
             progress=0.0,
             created_at=datetime.now(),
             updated_at=datetime.now(),
-            model=model,
         )
         self._jobs[job.id] = job
 

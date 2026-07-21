@@ -23,6 +23,3 @@ class StorageService:
 
         logger.debug("Saving input to disk completed")
         return track_dir
-
-    def save_track_metadata(self, job_id, metadata):
-        pass

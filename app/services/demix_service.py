@@ -38,7 +38,12 @@ class DemixService:
 
             track_metadata = self.audio_processor.validate_track(file)
             logger.info("Track validated")
-            # self.job_manager.update_job(job_id, ...)
+            self.job_manager.update_job(
+                job_id,
+                duration_seconds=track_metadata.duration_seconds,
+                sample_rate_hz=track_metadata.sample_rate_hz,
+                channels=track_metadata.channels,
+            )
 
             # 5. Save metadata
             # 5.1 Update job status
