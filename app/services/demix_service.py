@@ -25,9 +25,12 @@ class DemixService:
             file_metadata = self.audio_processor.validate_file(file)
             logger.info("File validated")
 
-            job_id = self.job_manager.create_job(model)
+            job_id = self.job_manager.create_job()
             logger.info("Job created")
             logger.bind(job_id=job_id)
+            self.job_manager.update_job(
+                job_id, model=model, size_bytes=file_metadata.size_bytes
+            )
 
             input_path = await self.storage_service.save_input(
                 job_id, file, file_metadata.extension
