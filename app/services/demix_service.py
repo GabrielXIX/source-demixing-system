@@ -22,27 +22,23 @@ class DemixService:
             file = data.file
             model = data.model
 
-            # 1. Do basic file validation
             file_metadata = self.audio_processor.validate_file(file)
             logger.info("File validated")
 
-            # 2. Create job
             job_id = self.job_manager.create_job(model)
             logger.info("Job created")
             logger.bind(job_id=job_id)
 
-            # 3. Save file to storage
-            # 3.1 Update job status
             input_path = await self.storage_service.save_input(
                 job_id, file, file_metadata.extension
             )
             logger.info("File saved to storage")
-            # Update job's input path
+            # todo: add method to ensure saved file integrity
+            self.job_manager.update_job(job_id, input_path=input_path)
 
-            # 4. Do deep file validation
-            # 4.1 Update job status
-            # 4.2 Delete file if deep validation fails
+            track_metadata = await self.audio_processor.validate_track(file)
             logger.info("Track validated")
+            # self.job_manager.update_job(job_id, ...)
 
             # 5. Save metadata
             # 5.1 Update job status
@@ -55,4 +51,5 @@ class DemixService:
             logger.unbind("job_id")
             return job_id
         except Exception as e:
+            # Do cleanup if try fails
             raise HTTPException(status_code=500, detail="error")

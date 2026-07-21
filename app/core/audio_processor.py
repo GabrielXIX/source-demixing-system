@@ -1,10 +1,15 @@
 from dataclasses import dataclass
+from pathlib import Path
 
-from exceptions import InvalidAudioError
+from exceptions import InvalidAudioError, SDSException
 from fastapi import UploadFile
 
 from app.core.logger import logger
 
+MAX_DURATION_SECONDS = 900  # 15 minutes
+MIN_SAMPLE_RATE = 8000  # 8 kHz
+MAX_SAMPLE_RATE = 192000  # 192 kHz
+MAX_CHANNELS = 8
 MAX_FILE_SIZE = 250 * 1024 * 1024  # 250 MB
 SUPPORTED_FILE_FORMATS = ["wav", "mp3"]
 CONTENT_TYPE_MAP = {
@@ -27,6 +32,13 @@ class ValidatedFileMetadata:
     size: int
     filename: str
     extension: str
+
+
+@dataclass
+class ValidatedTrackMetadata:
+    duration: int
+    sample_rate: int
+    num_channels: int
 
 
 class AudioProcessor:
@@ -57,11 +69,36 @@ class AudioProcessor:
             content_type=content_type, size=size, filename=filename, extension=extension
         )
 
-    def validate_track(self, file: UploadFile):
-        # Validate duration
+    async def validate_track(self, file_path: Path):
+        logger.debug("Track validation started")
+        try:
+            import torchaudio
 
-        # Validate sample rate
+            info = torchaudio.info(str(file_path))  # type: ignore
+        except Exception as e:
+            raise SDSException(
+                f"Failed to read audio file metadata with torchaudio: {str(e)}"
+            )
 
-        # Validate channels
+        duration = info.num_frames / info.sample_rate
+        if duration <= 0 or duration > MAX_DURATION_SECONDS:
+            raise InvalidAudioError(
+                f"Audio duration: {duration} s, is out of the allowed range: > 0 - {MAX_DURATION_SECONDS} s"
+            )
 
-        pass
+        sample_rate = info.sample_rate
+        if sample_rate < MIN_SAMPLE_RATE or sample_rate > MAX_SAMPLE_RATE:
+            raise InvalidAudioError(
+                f"Sample rate: {sample_rate} Hz, is out of the allowed range: {MIN_SAMPLE_RATE} - {MAX_SAMPLE_RATE} Hz"
+            )
+
+        num_channels = info.num_channels
+        if num_channels < 1 or num_channels > MAX_CHANNELS:
+            raise InvalidAudioError(
+                f"Number of channes: {num_channels}, is out of the allowed range: 1 - {MAX_CHANNELS}"
+            )
+
+        logger.debug("Track validation completed")
+        return ValidatedTrackMetadata(
+            duration=duration, sample_rate=sample_rate, num_channels=num_channels
+        )
