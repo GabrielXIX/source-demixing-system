@@ -18,6 +18,11 @@ class Settings(BaseSettings):
 
     STORAGE_PATH = "storage"
 
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    QUEUE_NAME: str = "demix-queue"
+    JOB_TIMEOUT: int = 600
+
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", case_sensitive=True
     )
