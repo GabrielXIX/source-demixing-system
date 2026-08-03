@@ -23,6 +23,7 @@ class JobStatus(str, Enum):
     """Enums for job statuses"""
 
     PENDING = "pending"
+    QUEUED = "queued"
     PROCESSING = "processing"
     COMPLETED = "completed"
     FAILED = "failed"

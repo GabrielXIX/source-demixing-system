@@ -8,7 +8,6 @@ from uuid import UUID, uuid4
 from redis import Redis
 
 from app.api.models.base import JobStatus, ModelType
-from app.api.utils.serializers import to_json_string, write_json_file
 from app.core.config import settings
 from app.core.exceptions import JobNotFoundError
 from app.core.logger import logger
@@ -79,13 +78,12 @@ class JobManager:
     def __init__(
         self,
         redis_client: Optional[Redis] = None,
-        redis_db: int = 1,
         ttl_seconds: int = 60 * 60 * 24,  # 1 day
     ):
         self.redis = redis_client or Redis(
             host=settings.REDIS_HOST,
             port=settings.REDIS_PORT,
-            db=redis_db,
+            db=0,
             decode_responses=True,
         )
         self.storage_path = Path(settings.STORAGE_PATH)
@@ -121,8 +119,7 @@ class JobManager:
         data = self.redis.hgetall(key)
 
         if not data:
-            logger.debug("Job not found, returning None")
-            return None
+            raise JobNotFoundError("Job not found in Redis")
 
         job = Job.from_redis(data)  # type: ignore
         logger.debug("Job retrieval completed")
