@@ -41,7 +41,7 @@ class ValidatedTrackMetadata:
     channels: int
 
 
-class AudioProcessor:
+class AudioValidator:
     def __init__(self):
         pass
 
