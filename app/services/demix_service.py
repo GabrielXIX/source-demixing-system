@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from storage_service import StorageService
 
-from app.core.audio_processor import AudioProcessor
+from app.core.audio_validator import AudioValidator
 from app.core.job_manager import JobManager
 from app.core.logger import logger
 from app.task_manager import TaskManager
@@ -10,11 +10,17 @@ from app.task_manager import TaskManager
 class DemixService:
     """Orchestrates the demix process"""
 
-    def __init__(self):
-        self._audio_processor = AudioProcessor()
-        self._job_manager = JobManager()
-        self._storage_service = StorageService()
-        self._task_manager = TaskManager()
+    def __init__(
+        self,
+        job_manager: JobManager,
+        storage_service: StorageService,
+        audio_validator: AudioValidator,
+        task_manager: TaskManager,
+    ):
+        self._job_manager = job_manager
+        self._storage_service = storage_service
+        self._audio_validator = audio_validator
+        self._task_manager = task_manager
 
     async def start_demix(self, data):
         try:
@@ -22,7 +28,7 @@ class DemixService:
             file = data.file
             model = data.model
 
-            file_metadata = self._audio_processor.validate_file(file)
+            file_metadata = self._audio_validator.validate_file(file)
             logger.info("File validated")
 
             job_id = self._job_manager.create_job()
@@ -39,7 +45,7 @@ class DemixService:
             # todo: add method to ensure saved file integrity
             self._job_manager.sync_job(job_id, input_path=input_path)
 
-            track_metadata = self._audio_processor.validate_track(file)
+            track_metadata = self._audio_validator.validate_track(file)
             logger.info("Track validated")
             self._job_manager.sync_job(
                 job_id,

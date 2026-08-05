@@ -3,12 +3,12 @@ from uuid import UUID
 
 from fastapi import UploadFile
 
-from app.core.config import settings
+from app.core.config import Settings
 from app.core.logger import logger
 
 
 class StorageService:
-    def __init__(self):
+    def __init__(self, settings: Settings):
         self.base_path = Path(settings.STORAGE_PATH)
         self.base_path.mkdir(parents=True, exist_ok=True)
 

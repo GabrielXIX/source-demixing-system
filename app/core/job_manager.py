@@ -5,10 +5,10 @@ from pathlib import Path
 from typing import Any, ClassVar, Optional
 from uuid import UUID, uuid4
 
-from redis import Redis
+from redis.asyncio import Redis
 
 from app.api.models.base import JobStatus, ModelType
-from app.core.config import settings
+from app.core.config import Settings
 from app.core.exceptions import JobNotFoundError
 from app.core.logger import logger
 
@@ -75,19 +75,10 @@ class JobManager:
 
     _JOB_FIELDS: ClassVar[set[str]] = set(Job.__dataclass_fields__.keys())
 
-    def __init__(
-        self,
-        redis_client: Optional[Redis] = None,
-        ttl_seconds: int = 60 * 60 * 24,  # 1 day
-    ):
-        self.redis = redis_client or Redis(
-            host=settings.REDIS_HOST,
-            port=settings.REDIS_PORT,
-            db=0,
-            decode_responses=True,
-        )
+    def __init__(self, redis_client: Redis, settings: Settings):
+        self.redis = redis_client
+        self.ttl_seconds = settings.JOB_RESULT_RETENTION_SECONDS
         self.storage_path = Path(settings.STORAGE_PATH)
-        self.ttl_seconds = ttl_seconds
 
         logger.info(
             "JobManager initialized",

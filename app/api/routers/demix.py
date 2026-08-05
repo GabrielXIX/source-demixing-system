@@ -1,6 +1,7 @@
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Form, status
+from deps import get_demix_service
+from fastapi import APIRouter, Depends, Form, status
 from fastapi.responses import FileResponse
 
 from app.api.models.request import DemixRequest
@@ -10,15 +11,13 @@ from app.services.demix_service import DemixService
 
 router = APIRouter(prefix="demix", tags=["Demix"])
 
-demix_service = DemixService()
-
 
 @router.post("", response_model=DemixResponse, status_code=status.HTTP_202_ACCEPTED)
 async def demix(
-    background_tasks: BackgroundTasks,
     data: DemixRequest = Form(..., media_type="multipart/form-data"),
+    demix_service: DemixService = Depends(get_demix_service),
 ):
-    job_id = await demix_service.start_demix(data, background_tasks)
+    job_id = await demix_service.start_demix(data)
     status_url, result_url, cancel_url = build_demix_response_urls(job_id)
 
     return DemixResponse(
