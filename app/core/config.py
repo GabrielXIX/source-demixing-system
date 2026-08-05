@@ -20,8 +20,12 @@ class Settings(BaseSettings):
 
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
+    JOBS_REDIS_DB = 0
+    BROKER_REDIS_DB = 1
     QUEUE_NAME: str = "demix-queue"
     JOB_TIMEOUT: int = 600
+
+    JOB_RESULT_RETENTION_SECONDS = 60 * 60 * 24  # 1 day
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", case_sensitive=True
