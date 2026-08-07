@@ -20,8 +20,8 @@ class Settings(BaseSettings):
 
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
-    JOBS_REDIS_DB = 0
-    BROKER_REDIS_DB = 1
+    REDIS_JOBS_DB = 0
+    REDIS_BROKER_DB = 1
     QUEUE_NAME: str = "demix-queue"
     JOB_TIMEOUT: int = 600
 

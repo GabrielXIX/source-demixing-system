@@ -7,7 +7,7 @@ from app.core.config import settings
 from app.core.job_manager import JobManager
 from app.core.logger import logger
 from app.infrastructure.demix_task_manager import DemixTaskManager
-from app.infrastructure.redis import create_broker_redis, create_jobs_redis
+from app.infrastructure.redis import create_async_jobs_redis, create_broker_redis
 from app.services.demix_orchestrator import DemixOrchestrator
 from app.services.storage_service import StorageService
 
@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
     # Set timeout for startup operations
 
     # Connections
-    jobs_redis = create_jobs_redis(settings)
+    jobs_redis = create_async_jobs_redis(settings)
     broker_redis = create_broker_redis(settings)
 
     # Infrastructure
@@ -41,6 +41,6 @@ async def lifespan(app: FastAPI):
     yield
 
     await jobs_redis.aclose()
-    await broker_redis.aclose()
+    await broker_redis.close()
 
     logger.info("Application shutting down...")
