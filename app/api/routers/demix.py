@@ -7,7 +7,8 @@ from fastapi.responses import FileResponse
 from app.api.models.request import DemixRequest
 from app.api.models.response import DemixResponse, JobCancelResponse, JobResponse
 from app.api.utils.links import build_demix_response_urls
-from app.services.demix_service import DemixService
+from app.services.demix_orchestrator import DemixOrchestrator
+from typing import Annotated
 
 router = APIRouter(prefix="demix", tags=["Demix"])
 
@@ -15,7 +16,7 @@ router = APIRouter(prefix="demix", tags=["Demix"])
 @router.post("", response_model=DemixResponse, status_code=status.HTTP_202_ACCEPTED)
 async def demix(
     data: DemixRequest = Form(..., media_type="multipart/form-data"),
-    demix_service: DemixService = Depends(get_demix_service),
+    demix_service: Annotated[DemixOrchestrator, Depends(get_demix_service)],
 ):
     job_id = await demix_service.start_demix(data)
     status_url, result_url, cancel_url = build_demix_response_urls(job_id)

@@ -6,8 +6,9 @@ from app.core.audio_validator import AudioValidator
 from app.core.config import settings
 from app.core.job_manager import JobManager
 from app.core.logger import logger
+from app.infrastructure.demix_task_manager import DemixTaskManager
 from app.infrastructure.redis import create_broker_redis, create_jobs_redis
-from app.services.demix_service import DemixService
+from app.services.demix_orchestrator import DemixOrchestrator
 from app.services.storage_service import StorageService
 
 
@@ -25,16 +26,17 @@ async def lifespan(app: FastAPI):
     job_manager = JobManager(redis_client=jobs_redis, settings=settings)
     storage_service = StorageService(settings)
     audio_validator = AudioValidator()
+    demix_task_manager = DemixTaskManager()
 
     # Application service
-    demix_service = DemixService(
+    demix_orchestrator = DemixOrchestrator(
         job_manager=job_manager,
         storage_service=storage_service,
         audio_validator=audio_validator,
-        task_manager="",
+        demix_task_manager=demix_task_manager,
     )
 
-    app.state.demix_service = demix_service
+    app.state.demix_orchestrator = demix_orchestrator
 
     yield
 

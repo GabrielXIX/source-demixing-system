@@ -4,10 +4,10 @@ from storage_service import StorageService
 from app.core.audio_validator import AudioValidator
 from app.core.job_manager import JobManager
 from app.core.logger import logger
-from app.task_manager import TaskManager
+from app.infrastructure.demix_task_manager import DemixTaskManager
 
 
-class DemixService:
+class DemixOrchestrator:
     """Orchestrates the demix process"""
 
     def __init__(
@@ -15,12 +15,12 @@ class DemixService:
         job_manager: JobManager,
         storage_service: StorageService,
         audio_validator: AudioValidator,
-        task_manager: TaskManager,
+        demix_task_manager: DemixTaskManager,
     ):
         self._job_manager = job_manager
         self._storage_service = storage_service
         self._audio_validator = audio_validator
-        self._task_manager = task_manager
+        self._demix_task_manager = demix_task_manager
 
     async def start_demix(self, data):
         try:
@@ -54,7 +54,7 @@ class DemixService:
                 channels=track_metadata.channels,
             )
 
-            self._task_manager.enqueue_track_processing(job_id)
+            self._demix_task_manager.enqueue_demix(job_id)
             logger.info("Background demix process started")
 
             logger.unbind("job_id")
