@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     LOG_JSON_FORMAT: bool = False
     LOG_INCLUDE_STACK: bool = False
     LOG_TO_FILE: bool = False
-    LOG_FILE_PATH: str = "logs/app.log"
+    LOGS_DIRECTORY: str = "logs/"
     LOG_FILE_MAX_BYTES: int = 5 * 1024 * 1024  # 5 MB
     LOG_FILE_BACKUP_COUNT: int = 3
 

@@ -3,7 +3,7 @@ import re
 import sys
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import structlog
 from structlog.types import EventDict, Processor
@@ -20,18 +20,17 @@ def _to_snake_case(name: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
 
 
-class Logger:
-    _instance = None
+class LoggingManager:
+    def __init__(
+        self,
+        role: str,
+        log_to_file: bool = False,
+        log_format: str = "default",
+        log_level: str = "INFO",
+    ):
+        self._configure_structlog(role, log_format, log_level)
 
-    def __init__(self, json_logs: bool = False, log_level: str = "INFO"):
-        if Logger._instance is None:
-            self._configure_structlog(json_logs, log_level)
-            Logger._instance = self
-
-        self._app_logger = structlog.stdlib.get_logger(settings.APP_LOGGER_NAME)
-        self._access_logger = structlog.stdlib.get_logger(settings.ACCESS_LOGGER_NAME)
-
-    def _configure_structlog(self, json_logs: bool, log_level: str):
+    def _configure_structlog(self, role: str, log_format: str, log_level: str):
         timestamper = structlog.processors.TimeStamper(fmt="iso")
 
         shared_processors: list[Processor] = [
@@ -45,7 +44,7 @@ class Logger:
             structlog.processors.StackInfoRenderer(),
         ]
 
-        if json_logs:
+        if log_format == "json":
             shared_processors.append(structlog.processors.format_exc_info)
 
         structlog.configure(
@@ -59,7 +58,7 @@ class Logger:
 
         log_renderer = (
             structlog.processors.JSONRenderer()
-            if json_logs
+            if log_format == "json"
             else structlog.dev.ConsoleRenderer()
         )
 
@@ -79,7 +78,7 @@ class Logger:
         root_logger.addHandler(console_handler)
 
         if settings.LOG_TO_FILE:
-            log_path = Path(settings.LOG_FILE_PATH)
+            log_path = Path(settings.LOGS_DIRECTORY) / f"{role}.log"
             log_path.parent.mkdir(parents=True, exist_ok=True)
 
             file_handler = RotatingFileHandler(
@@ -100,7 +99,8 @@ class Logger:
         logging.getLogger("uvicorn.error").propagate = True
         logging.getLogger("uvicorn.access").propagate = False
 
-    def bind(self, *args, **new_values: Any):
+    @staticmethod
+    def bind(*args, **new_values: Any):
         for arg in args:
             if hasattr(arg, "id"):
                 key = _to_snake_case(type(arg).__name__)
@@ -111,41 +111,10 @@ class Logger:
     def unbind(*keys: str):
         structlog.contextvars.unbind_contextvars(*keys)
 
-    def debug(self, event: Optional[str] = None, *args: Any, **kwargs: Any):
-        self._app_logger.debug(event, *args, **kwargs)
+    @staticmethod
+    def get_app_logger():
+        return structlog.stdlib.get_logger(settings.APP_LOGGER_NAME)
 
-    def info(self, event: Optional[str] = None, *args: Any, **kwargs: Any):
-        self._app_logger.info(event, *args, **kwargs)
-
-    def warning(self, event: Optional[str] = None, *args: Any, **kwargs: Any):
-        self._app_logger.warning(event, *args, **kwargs)
-
-    def error(self, event: Optional[str] = None, *args: Any, **kwargs: Any):
-        self._app_logger.error(event, *args, **kwargs)
-
-    def critical(self, event: Optional[str] = None, *args: Any, **kwargs: Any):
-        self._app_logger.critical(event, *args, **kwargs)
-
-    def exception(self, event: Optional[str] = None, *args: Any, **kwargs: Any):
-        self._app_logger.exception(event, *args, **kwargs)
-
-    def access_debug(self, event: Optional[str] = None, *args: Any, **kw: Any):
-        self._access_logger.debug(event, *args, **kw)
-
-    def access_info(self, event: Optional[str] = None, *args: Any, **kw: Any):
-        self._access_logger.info(event, *args, **kw)
-
-    def access_warning(self, event: Optional[str] = None, *args: Any, **kw: Any):
-        self._access_logger.warning(event, *args, **kw)
-
-    def access_error(self, event: Optional[str] = None, *args: Any, **kw: Any):
-        self._access_logger.error(event, *args, **kw)
-
-    def access_critical(self, event: Optional[str] = None, *args: Any, **kw: Any):
-        self._access_logger.critical(event, *args, **kw)
-
-    def access_exception(self, event: Optional[str] = None, *args: Any, **kw: Any):
-        self._access_logger.exception(event, *args, **kw)
-
-
-logger = Logger(json_logs=settings.LOG_JSON_FORMAT, log_level=settings.LOG_LEVEL)
+    @staticmethod
+    def get_access_logger():
+        return structlog.stdlib.get_logger(settings.ACCESS_LOGGER_NAME)

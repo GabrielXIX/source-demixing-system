@@ -10,7 +10,9 @@ from redis.asyncio import Redis
 from app.api.models.base import JobStatus, ModelType
 from app.core.config import Settings
 from app.core.exceptions import JobNotFoundError
-from app.core.logger import logger
+from app.core.logging_manager import LoggingManager
+
+log = LoggingManager.get_app_logger()
 
 
 @dataclass

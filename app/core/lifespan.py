@@ -5,16 +5,18 @@ from fastapi import FastAPI
 from app.core.audio_validator import AudioValidator
 from app.core.config import settings
 from app.core.job_manager import JobManager
-from app.core.logger import logger
+from app.core.logging_manager import LoggingManager
 from app.infrastructure.demix_task_manager import DemixTaskManager
 from app.infrastructure.redis import create_async_jobs_redis, create_broker_redis
 from app.services.demix_orchestrator import DemixOrchestrator
 from app.services.storage_service import StorageService
 
+log = LoggingManager.get_app_logger()
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Application starting up...")
+    log.info("Application starting up...")
     # Do sanity check
     # Set timeout for startup operations
 
@@ -43,4 +45,4 @@ async def lifespan(app: FastAPI):
     await jobs_redis.aclose()
     await broker_redis.close()
 
-    logger.info("Application shutting down...")
+    log.info("Application shutting down...")

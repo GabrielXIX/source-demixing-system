@@ -3,8 +3,10 @@ from storage_service import StorageService
 
 from app.core.audio_validator import AudioValidator
 from app.core.job_manager import JobManager
-from app.core.logger import logger
+from app.core.logging_manager import LoggingManager
 from app.infrastructure.demix_task_manager import DemixTaskManager
+
+log = LoggingManager.get_app_logger()
 
 
 class DemixOrchestrator:
@@ -24,16 +26,16 @@ class DemixOrchestrator:
 
     async def start_demix(self, data):
         try:
-            logger.info("Demix process started")
+            log.info("Demix process started")
             file = data.file
             model = data.model
 
             file_metadata = self._audio_validator.validate_file(file)
-            logger.info("File validated")
+            log.info("File validated")
 
             job_id = self._job_manager.create_job()
-            logger.info("Job created")
-            logger.bind(job_id=job_id)
+            log.info("Job created")
+            LoggingManager.bind(job_id=job_id)
             self._job_manager.sync_job(
                 job_id, model=model, size_bytes=file_metadata.size_bytes
             )
@@ -41,12 +43,12 @@ class DemixOrchestrator:
             input_path = await self._storage_service.save_input(
                 job_id, file, file_metadata.extension
             )
-            logger.info("File saved to storage")
+            log.info("File saved to storage")
             # todo: add method to ensure saved file integrity
             self._job_manager.sync_job(job_id, input_path=input_path)
 
             track_metadata = self._audio_validator.validate_track(file)
-            logger.info("Track validated")
+            log.info("Track validated")
             self._job_manager.sync_job(
                 job_id,
                 duration_seconds=track_metadata.duration_seconds,
@@ -55,10 +57,12 @@ class DemixOrchestrator:
             )
 
             self._demix_task_manager.enqueue_demix(job_id)
-            logger.info("Background demix process started")
+            log.info("Background demix process started")
 
-            logger.unbind("job_id")
+            log.unbind("job_id")
             return job_id
         except Exception as e:
             # todo: do cleanup if try fails
             raise HTTPException(status_code=500, detail="error")
+        finally:
+            LoggingManager.unbind("job_id")

@@ -4,7 +4,9 @@ from pathlib import Path
 from exceptions import InvalidAudioError, SDSException
 from fastapi import UploadFile
 
-from app.core.logger import logger
+from app.core.logging_manager import LoggingManager
+
+log = LoggingManager.get_app_logger()
 
 MAX_DURATION_SECONDS = 900  # 15 minutes
 MIN_SAMPLE_RATE = 8000  # 8 kHz
@@ -46,7 +48,7 @@ class AudioValidator:
         pass
 
     def validate_file(self, file: UploadFile):
-        logger.debug("File validation started")
+        log.debug("File validation started")
 
         content_type = file.content_type
         if not content_type or content_type.startswith("audio/"):
@@ -64,7 +66,7 @@ class AudioValidator:
         if extension not in SUPPORTED_FILE_FORMATS:
             raise InvalidAudioError("Unsupported file extension")
 
-        logger.debug("File validation completed")
+        log.debug("File validation completed")
         return ValidatedFileMetadata(
             content_type=content_type,
             size_bytes=size_bytes,
@@ -73,7 +75,7 @@ class AudioValidator:
         )
 
     def validate_track(self, file_path: Path):
-        logger.debug("Track validation started")
+        log.debug("Track validation started")
         try:
             import torchaudio
 
@@ -101,7 +103,7 @@ class AudioValidator:
                 f"Number of channes: {channels}, is out of the allowed range: 1 - {MAX_CHANNELS}"
             )
 
-        logger.debug("Track validation completed")
+        log.debug("Track validation completed")
         return ValidatedTrackMetadata(
             duration_seconds=duration_seconds,
             sample_rate_hz=sample_rate_hz,
