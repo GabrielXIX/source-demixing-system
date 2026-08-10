@@ -6,9 +6,15 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "demucs==4.1.0",
+    "dramatiq>=2.2.0",
+    "fastapi>=0.141.1",
     "numpy>=2.5.2",
+    "pydantic-settings>=2.15.0",
+    "redis>=8.1.0",
+    "structlog>=26.1.0",
     "torch",
     "torchaudio",
+    "uvicorn>=0.52.1",
 ]
 
 [[tool.uv.index]]
