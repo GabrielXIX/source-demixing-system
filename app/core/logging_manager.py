@@ -8,7 +8,9 @@ from typing import Any
 import structlog
 from structlog.types import EventDict, Processor
 
-from .config import settings
+from app.core.enums import LogFormat, LogRole
+
+from .config import Settings
 
 
 def _drop_color_message_key(_, __, event_dict: EventDict) -> EventDict:
@@ -21,16 +23,14 @@ def _to_snake_case(name: str) -> str:
 
 
 class LoggingManager:
-    def __init__(
-        self,
-        role: str,
-        log_to_file: bool = False,
-        log_format: str = "default",
-        log_level: str = "INFO",
-    ):
-        self._configure_structlog(role, log_format, log_level)
+    _app_logger_name: str | None = None
+    _access_logger_name: str | None = None
 
-    def _configure_structlog(self, role: str, log_format: str, log_level: str):
+    @classmethod
+    def initialize(cls, role: LogRole, settings: Settings):
+        cls._app_logger_name = settings.APP_LOGGER_NAME
+        cls._access_logger_name = settings.ACCESS_LOGGER_NAME
+
         timestamper = structlog.processors.TimeStamper(fmt="iso")
 
         shared_processors: list[Processor] = [
@@ -44,7 +44,7 @@ class LoggingManager:
             structlog.processors.StackInfoRenderer(),
         ]
 
-        if log_format == "json":
+        if settings.LOG_FORMAT == LogFormat.JSON:
             shared_processors.append(structlog.processors.format_exc_info)
 
         structlog.configure(
@@ -58,7 +58,7 @@ class LoggingManager:
 
         log_renderer = (
             structlog.processors.JSONRenderer()
-            if log_format == "json"
+            if settings.LOG_FORMAT == LogFormat.JSON
             else structlog.dev.ConsoleRenderer()
         )
 
@@ -71,7 +71,7 @@ class LoggingManager:
         )
 
         root_logger = logging.getLogger()
-        root_logger.setLevel(log_level.upper())
+        root_logger.setLevel(settings.LOG_LEVEL.upper())
 
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setFormatter(formatter)
@@ -111,10 +111,10 @@ class LoggingManager:
     def unbind(*keys: str):
         structlog.contextvars.unbind_contextvars(*keys)
 
-    @staticmethod
-    def get_app_logger():
-        return structlog.stdlib.get_logger(settings.APP_LOGGER_NAME)
+    @classmethod
+    def get_app_logger(cls):
+        return structlog.stdlib.get_logger(cls._app_logger_name)
 
-    @staticmethod
-    def get_access_logger():
-        return structlog.stdlib.get_logger(settings.ACCESS_LOGGER_NAME)
+    @classmethod
+    def get_access_logger(cls):
+        return structlog.stdlib.get_logger(cls._access_logger_name)

@@ -1,5 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.core.enums import LogFormat
+
 
 class Settings(BaseSettings):
     API_VERSION: str = "v1"
@@ -9,7 +11,7 @@ class Settings(BaseSettings):
     ACCESS_LOGGER_NAME: str = "sds.access_logs"
 
     LOG_LEVEL: str = "INFO"
-    LOG_JSON_FORMAT: bool = False
+    LOG_FORMAT: LogFormat = LogFormat.DEFAULT
     LOG_INCLUDE_STACK: bool = False
     LOG_TO_FILE: bool = False
     LOGS_DIRECTORY: str = "logs/"
