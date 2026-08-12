@@ -28,7 +28,6 @@ _context = WorkerContext(
     demix_processor=DemixProcessor(
         storage_service=storage_service, demucs_engine=demucs_engine
     ),
-    logger="",
 )
 
 

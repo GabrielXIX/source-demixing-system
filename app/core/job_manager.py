@@ -82,7 +82,7 @@ class JobManager:
         self.ttl_seconds = settings.JOB_RESULT_RETENTION_SECONDS
         self.storage_path = Path(settings.STORAGE_PATH)
 
-        logger.info(
+        log.info(
             "JobManager initialized",
             extra={
                 "redis_db": self.redis,
@@ -91,7 +91,7 @@ class JobManager:
         )
 
     def create_job(self) -> UUID:
-        logger.debug("Job creation started")
+        log.debug("Job creation started")
         job = Job(
             id=uuid4(),
             status=JobStatus.PENDING,
@@ -103,11 +103,11 @@ class JobManager:
 
         self.sync_job(job.id, **asdict(job))
 
-        logger.debug("Job creation completed")
+        log.debug("Job creation completed")
         return job.id
 
     def get_job(self, job_id):
-        logger.debug("Job retrieval started")
+        log.debug("Job retrieval started")
         key = str(job_id)
         data = self.redis.hgetall(key)
 
@@ -115,11 +115,11 @@ class JobManager:
             raise JobNotFoundError("Job not found in Redis")
 
         job = Job.from_redis(data)  # type: ignore
-        logger.debug("Job retrieval completed")
+        log.debug("Job retrieval completed")
         return job
 
     def sync_job(self, job_id: UUID, **kwargs):
-        logger.debug("Job sync started")
+        log.debug("Job sync started")
         key = str(job_id)
         parsed_data = self._get_parsed_dict(**kwargs)
 
@@ -131,16 +131,16 @@ class JobManager:
 
         self.redis.hset(key, mapping=parsed_data)
         self.redis.expire(key, self.ttl_seconds)
-        logger.debug("Job sync completed")
+        log.debug("Job sync completed")
 
     def _get_parsed_dict(self, **kwargs):
-        logger.debug("Keyword arguments parse started")
+        log.debug("Keyword arguments parse started")
         valid_fields = self._JOB_FIELDS
         filtered_kwargs = {k: v for k, v in kwargs.items() if k in valid_fields}
 
         unknown = set(kwargs.keys()) - valid_fields
         if unknown:
-            logger.warning(f"Unknown fields ignored: {unknown}")
+            log.warning(f"Unknown fields ignored: {unknown}")
 
         parsed_dict = {}
         for k, v in filtered_kwargs.items():
@@ -154,7 +154,7 @@ class JobManager:
                 parsed_dict[k] = json.dumps(v)
             else:
                 parsed_dict[k] = str(v)
-        logger.debug("Keyword arguments parse completed")
+        log.debug("Keyword arguments parse completed")
         return parsed_dict
 
     def get_all_jobs(self): ...
